@@ -19,7 +19,8 @@ class BaseModel(models.Model):
 
 
 class Location(BaseModel):
-    name = models.CharField('Название места', max_length=settings.MAX_FIELD_LENGTH)
+    name = models.CharField(
+        'Название места', max_length=settings.MAX_FIELD_LENGTH)
 
     class Meta:
         verbose_name = 'местоположение'
@@ -32,7 +33,9 @@ class Location(BaseModel):
 class Category(BaseModel):
     title = models.CharField('Заголовок', max_length=settings.MAX_FIELD_LENGTH)
     description = models.TextField('Описание')
-    slug = models.SlugField('Идентификатор', max_length=settings.MAX_FIELD_LENGTH, unique=True,
+    slug = models.SlugField('Идентификатор', 
+                            max_length=settings.MAX_FIELD_LENGTH, 
+                            unique=True,
                             help_text='Идентификатор страницы для URL; '
                             'разрешены символы латиницы, цифры, '
                             'дефис и подчёркивание.')
