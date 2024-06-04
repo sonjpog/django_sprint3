@@ -33,8 +33,8 @@ class Location(BaseModel):
 class Category(BaseModel):
     title = models.CharField('Заголовок', max_length=settings.MAX_FIELD_LENGTH)
     description = models.TextField('Описание')
-    slug = models.SlugField('Идентификатор', 
-                            max_length=settings.MAX_FIELD_LENGTH, 
+    slug = models.SlugField('Идентификатор',
+                            max_length=settings.MAX_FIELD_LENGTH,
                             unique=True,
                             help_text='Идентификатор страницы для URL; '
                             'разрешены символы латиницы, цифры, '
