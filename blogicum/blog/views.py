@@ -1,10 +1,9 @@
 from django.conf import settings
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, get_object_or_404
-from django.utils.timezone import now
 
-from blog.models import Post, Category
-from .utils import get_posts  # Импорт функции из utils.py
+from blog.models import Category
+from .utils import get_posts
 
 
 def index(request: HttpRequest) -> HttpResponse:
