@@ -5,7 +5,19 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class BaseBlogModel(models.Model):
+class InheritableOrderingMeta(models.base.ModelBase):
+    def __new__(cls, name, bases, attrs):
+        new_class = super().__new__(cls, name, bases, attrs)
+        if 'Meta' in attrs:
+            meta = attrs['Meta']
+            if hasattr(meta, 'ordering'):
+                if not getattr(new_class._meta, 'abstract', False):
+                    if not hasattr(new_class._meta, 'ordering'):
+                        new_class._meta.ordering = meta.ordering
+        return new_class
+
+
+class PublishedModel(models.Model, metaclass=InheritableOrderingMeta):
     is_published = models.BooleanField(
         'Опубликовано',
         default=True,
@@ -18,20 +30,19 @@ class BaseBlogModel(models.Model):
         ordering = ('created_at', )
 
 
-class Location(BaseBlogModel):
+class Location(PublishedModel):
     name = models.CharField(
         'Название места', max_length=settings.MAX_FIELD_LENGTH)
 
     class Meta:
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
-        ordering = BaseBlogModel.Meta.ordering
 
     def __str__(self) -> str:
         return self.name[:settings.REPRESENTATION_LENGTH]
 
 
-class Category(BaseBlogModel):
+class Category(PublishedModel):
     title = models.CharField('Заголовок', max_length=settings.MAX_FIELD_LENGTH)
     description = models.TextField('Описание')
     slug = models.SlugField(
@@ -48,13 +59,12 @@ class Category(BaseBlogModel):
     class Meta:
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
-        ordering = BaseBlogModel.Meta.ordering
 
     def __str__(self) -> str:
         return self.title[:settings.REPRESENTATION_LENGTH]
 
 
-class Post(BaseBlogModel):
+class Post(PublishedModel):
     title = models.CharField('Заголовок', max_length=settings.MAX_FIELD_LENGTH)
     text = models.TextField('Текст')
     pub_date = models.DateTimeField(
@@ -80,7 +90,7 @@ class Post(BaseBlogModel):
         default_related_name = 'posts'
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
-        ordering = ('-pub_date', BaseBlogModel.Meta.ordering[0])
+        ordering = ('-pub_date', 'created_at')
 
     def __str__(self):
         return self.title[:settings.REPRESENTATION_LENGTH]

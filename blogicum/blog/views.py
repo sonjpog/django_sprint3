@@ -4,17 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.timezone import now
 
 from blog.models import Post, Category
-
-
-def get_posts(**filters):
-    return Post.objects.select_related(
-        'author', 'category', 'location',
-    ).filter(
-        is_published=True,
-        pub_date__lt=now(),
-        category__is_published=True,
-        **filters
-    )
+from .utils import get_posts  # Импорт функции из utils.py
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -25,13 +15,17 @@ def index(request: HttpRequest) -> HttpResponse:
 
 
 def post_detail(request, post_id):
-    post = get_object_or_404(get_posts(), id=post_id)
+    post = get_object_or_404(
+        get_posts(),
+        id=post_id
+    )
     return render(request, 'blog/detail.html', {'post': post})
 
 
 def category_posts(request, category_slug):
     category = get_object_or_404(
         Category, slug=category_slug, is_published=True)
+
     posts = get_posts(category=category)
     template = 'blog/category.html'
     context = {
