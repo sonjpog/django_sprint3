@@ -5,19 +5,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class InheritableOrderingMeta(models.base.ModelBase):
-    def __new__(cls, name, bases, attrs):
-        new_class = super().__new__(cls, name, bases, attrs)
-        if 'Meta' in attrs:
-            meta = attrs['Meta']
-            if hasattr(meta, 'ordering'):
-                if not getattr(new_class._meta, 'abstract', False):
-                    if not hasattr(new_class._meta, 'ordering'):
-                        new_class._meta.ordering = meta.ordering
-        return new_class
-
-
-class PublishedModel(models.Model, metaclass=InheritableOrderingMeta):
+class PublishedModel(models.Model):
     is_published = models.BooleanField(
         'Опубликовано',
         default=True,
@@ -34,7 +22,7 @@ class Location(PublishedModel):
     name = models.CharField(
         'Название места', max_length=settings.MAX_FIELD_LENGTH)
 
-    class Meta:
+    class Meta(PublishedModel.Meta):
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
 
@@ -56,7 +44,7 @@ class Category(PublishedModel):
         )
     )
 
-    class Meta:
+    class Meta(PublishedModel.Meta):
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
 
@@ -86,11 +74,11 @@ class Post(PublishedModel):
         verbose_name='Категория'
     )
 
-    class Meta:
+    class Meta(PublishedModel.Meta):
         default_related_name = 'posts'
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
-        ordering = ('-pub_date', 'created_at')
+        ordering = ('-pub_date', ) + PublishedModel.Meta.ordering
 
     def __str__(self):
         return self.title[:settings.REPRESENTATION_LENGTH]
